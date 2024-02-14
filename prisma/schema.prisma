@@ -1,0 +1,134 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// Define your models and relationships in schema.prisma
+
+model User {
+  id          Int           @id @default(autoincrement())
+  username    String        @db.VarChar(30) @unique
+  password    String        @db.VarChar(72)
+  email       String?
+}
+
+model Project {
+  ProjectID    Int            @id @default(autoincrement())
+  Name         String
+  Description  String
+  StartDate    DateTime
+  EndDate      DateTime
+  tasks        Task[]
+  teams        TeamProject[]
+  documents    ProjectDocument[]
+  issues       IssueAndQuestion[]
+  UserProjects UserProject[]
+}
+
+model Task {
+  TaskID      Int      @id @default(autoincrement())
+  Name        String
+  Description String
+  Status      String
+  ProjectID   Int
+  project     Project  @relation(fields: [ProjectID], references: [ProjectID])
+}
+
+model Team {
+  TeamID    Int      @id @default(autoincrement())
+  TeamName  String
+  projects  TeamProject[]
+}
+
+model CalendarEvent {
+  EventID   Int      @id @default(autoincrement())
+  Activity  String
+  Date      DateTime
+  Time      DateTime
+}
+
+model ProjectDocument {
+  DocumentID Int      @id @default(autoincrement())
+  Name       String
+  Description String
+  Version    String
+  ProjectID  Int
+  project    Project  @relation(fields: [ProjectID], references: [ProjectID])
+}
+
+model IssueAndQuestion {
+  IssueID    Int      @id @default(autoincrement())
+  Title      String
+  Description String
+  Status     String
+  ProjectID  Int
+  project    Project  @relation(fields: [ProjectID], references: [ProjectID])
+}
+
+// Many-to-Many Relationship between User and Project
+model UserProject {
+  ID    Int      
+  ProjectID Int      
+  user      Int  @map("user_id")
+  project   Project  @relation(fields: [ProjectID], references: [ProjectID])
+
+  @@id([ID, ProjectID])
+}
+
+// Many-to-Many Relationship between Team and Project
+model TeamProject {
+  TeamID    Int      
+  ProjectID Int      
+  team      Team     @relation(fields: [TeamID], references: [TeamID])
+  project   Project  @relation(fields: [ProjectID], references: [ProjectID])
+
+  @@id([TeamID, ProjectID])
+}
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// generator client {
+//   provider = "prisma-client-js"
+// }
+
+// datasource db {
+//   provider = "mysql"
+//   url      = env("DATABASE_URL")
+// }
+
+// model User {
+//   id          Int           @id @default(autoincrement())
+//   username    String        @db.VarChar(30) @unique
+//   password    String        @db.VarChar(72)
+//   email       String?
+//   todos       Todo[]        
+
+//   @@map("users")
+// }
+
+
+// model Todo {
+//   id          Int           @id @default(autoincrement())
+//   title       String        @db.VarChar(150)
+//   status      Status        @default(PENDING)
+//   dueDate     DateTime      @db.Date @map("due_date")
+//   userId      Int           @map("user_id")
+//   user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+//   createdAt   DateTime      @default(now()) @db.Timestamp(0) @map("created_at")
+//   updatedAt   DateTime      @updatedAt @db.Timestamp(0) @map("updated_at")
+
+//   @@map("todos")
+// }
+
+// enum Status {
+//   PENDING
+//   DOING
+//   DONE
+// }
